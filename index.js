@@ -3,6 +3,7 @@ const videos = require("./videos");
 const {google} = require("googleapis");
 const apiKey = "AIzaSyDgirsYuZAkib_AijwHgrzl8fAj6NEwG-U";
 const saveData = require("./utils");
+const rateLimit = require("express-rate-limit");
 
 const youtube = google.youtube({
     version: 'v3',
@@ -10,6 +11,14 @@ const youtube = google.youtube({
   });
 
 const app = express();
+
+const limiter = rateLimit({
+    max: 5,
+    windowMs: 60 * 60 * 1000,
+    message: "You have crossed daily limit of request from this IP"
+});
+
+app.use(limiter);
 
 app.get("/get/:title/:desc",(req, res)=>{
     res.send("Hello");
