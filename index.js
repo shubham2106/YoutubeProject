@@ -36,7 +36,7 @@ app.post("/key", (req, res) => {
     addNewKey(req.body.key);
 })
 
-fetchLatestVideos();
+// fetchLatestVideos();
 // setInterval(async  () => {
 //     console.log("Data Fetched");
 //     try{ 
