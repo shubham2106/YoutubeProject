@@ -2,18 +2,13 @@ const express = require("express");
 const videos = require("./videos");
 const {google} = require("googleapis");
 const apiKey = "AIzaSyDgirsYuZAkib_AijwHgrzl8fAj6NEwG-U";
-const saveData = require("./utils");
+const {saveData, fetchLatestVideos, refreshAPIKeyStore, addNewKey} = require("./utils");
 const rateLimit = require("express-rate-limit");
-
-const youtube = google.youtube({
-    version: 'v3',
-    auth: apiKey,
-  });
 
 const app = express();
 
 const limiter = rateLimit({
-    max: 5,
+    max: 50,
     windowMs: 60 * 60 * 1000,
     message: "You have crossed daily limit of request from this IP"
 });
@@ -24,32 +19,33 @@ app.get("/get/:title/:desc",(req, res)=>{
     res.send("Hello");
 })
 
-app.get("/getAll",async (req,res) => {
-    res.send(await videos.find({}).sort({publishTime:-1}));
+app.get("/getAll/page=:pageNum",async (req,res) => {
+    res.send(await videos.find({}).limit(10).skip(10*req.params.pageNum).sort({publishTime:-1}));
 })
 
-app.get("/search/:title",async (req,res) => {
+app.get("/search/:title/page=:pageNum",async (req,res) => {
     const {title} = req.params;
-    res.send(await videos.find({$text:{$search: title}}).sort({publishTime:-1}).exec());
+    res.send(await videos.find({$text:{$search: title}}).limit(10).skip(10*req.params.pageNum).sort({publishTime:-1}).exec());
 })
 
-app.get("/search", async (req, res) => {    // To get the data from yt api and store it in mongo.
-    const response = await youtube.search.list({
-        part: 'id,snippet',
-        q: 'How to make tea',
-        "maxResults": 25,
-        "order": "date",
-        "publishedAfter": "2024-05-23T23:55:55Z"
-    });
-    const responseData = response.data;
-    saveData(responseData);
-    res.send(response.data);
-  });
+app.post("/key", (req, res) => {
+    addNewKey(req.body.key);
+})
 
+fetchLatestVideos();
 setInterval(async  () => {
     console.log("Data Fetched");
-    await fetch(`http://localhost:3000/search`);
+    try{ 
+        fetchLatestVideos();
+    }
+    catch(Error){
+        console.log(`Exception in fetching video, ${JSON.stringify(Error)}`)
+    }
     console.log("After Fetch");
-}, 10000);
+}, 100000);
+
+setInterval(async  () => {
+    refreshAPIKeyStore();
+}, 24*60*60*1000)
 
 app.listen(3000);
