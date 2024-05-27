@@ -19,6 +19,10 @@ app.get("/get/:title/:desc",(req, res)=>{
     res.send("Hello");
 })
 
+app.get("/",(req, res)=>{
+    res.send("Welcome to YT Project by Shubham");
+})
+
 app.get("/getAll/page=:pageNum",async (req,res) => {
     res.send(await videos.find({}).limit(10).skip(10*req.params.pageNum).sort({publishTime:-1}));
 })
