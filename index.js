@@ -36,20 +36,20 @@ app.post("/key", (req, res) => {
     addNewKey(req.body.key);
 })
 
-// fetchLatestVideos();
-// setInterval(async  () => {
-//     console.log("Data Fetched");
-//     try{ 
-//         fetchLatestVideos();
-//     }
-//     catch(Error){
-//         console.log(`Exception in fetching video, ${JSON.stringify(Error)}`)
-//     }
-//     console.log("After Fetch");
-// }, 100000);
+fetchLatestVideos();
+setInterval(async  () => {
+    console.log("Data Fetched");
+    try{ 
+        fetchLatestVideos();
+    }
+    catch(Error){
+        console.log(`Exception in fetching video, ${JSON.stringify(Error)}`)
+    }
+    console.log("After Fetch");
+}, 100000);
 
-// setInterval(async  () => {
-//     refreshAPIKeyStore();
-// }, 24*60*60*1000)
+setInterval(async  () => {
+    refreshAPIKeyStore();
+}, 24*60*60*1000)
 
 app.listen(3000);
